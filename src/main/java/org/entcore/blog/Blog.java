@@ -24,9 +24,11 @@
 package org.entcore.blog;
 
 import fr.wseduc.mongodb.MongoDb;
+import io.vertx.core.json.JsonArray;
 import org.entcore.blog.controllers.BlogController;
 import org.entcore.blog.controllers.FoldersController;
 import org.entcore.blog.controllers.PostController;
+import org.entcore.blog.core.constants.Field;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.explorer.PostExplorerPlugin;
@@ -39,6 +41,9 @@ import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.mongodb.MongoDbConf;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Blog extends BaseServer {
 
@@ -61,7 +66,12 @@ public class Blog extends BaseServer {
         setRepositoryEvents(new BlogRepositoryEvents(vertx));
 
         if (config.getBoolean("searching-event", true)) {
-            setSearchingEvents(new BlogSearchingEvents());
+            List<String> searchingOnList = config.getJsonArray("searching-on", new JsonArray().add(Field.POST)).stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toList());
+            setSearchingEvents(new BlogSearchingEvents(searchingOnList));
         }
 
         final MongoDbConf conf = MongoDbConf.getInstance();
@@ -71,7 +81,7 @@ public class Blog extends BaseServer {
         blogPlugin = BlogExplorerPlugin.create(securedActions);
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
-        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin);
+        final PostService postService = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin);
         final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
                 config.getInteger("blog-search-word-min-size", 4), blogPlugin);
         addController(new BlogController(mongo, blogService, postService));
@@ -83,7 +93,7 @@ public class Blog extends BaseServer {
     @Override
     public void stop() throws Exception {
         super.stop();
-        if(blogPlugin != null){
+        if (blogPlugin != null) {
             blogPlugin.stop();
         }
     }
