@@ -80,4 +80,7 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     @Override
     protected String getCollectionName() { return COLLECTION; }
 
+    protected String getParentColumn() {
+        return "blog.$id";
+    }
 }
