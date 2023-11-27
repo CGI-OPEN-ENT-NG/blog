@@ -16,6 +16,7 @@ import org.entcore.common.service.impl.MongoDbSearchService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.entcore.common.mongodb.MongoDbResult.validResultsHandler;
@@ -70,8 +71,14 @@ public class PostSearch implements ISearch {
         Promise<JsonArray> promise = Promise.promise();
         final int skip = (0 == page) ? -1 : page * limit;
 
-        final QueryBuilder worldsQuery = new QueryBuilder();
-        worldsQuery.text(MongoDbSearchService.textSearchedComposition(searchWords));
+        final QueryBuilder worldsQuery = QueryBuilder.start();
+
+        // toArray(DBObject[]::new) allows you to have a DBObject... from a stream
+        worldsQuery.and(searchWords.stream().map(s -> new QueryBuilder()
+                .or(
+                        QueryBuilder.start(Field.TITLE).regex(Pattern.compile(".*(?=.*(\\b|>)" + s + "(\\b|<)).*")).get(),
+                        QueryBuilder.start(Field.CONTENT).regex(Pattern.compile(".*(?=.*(\\b|>)" + s + "(\\b|<)).*")).get()
+                ).get()).toArray(DBObject[]::new));
 
         final QueryBuilder blogQuery = QueryBuilder.start("blog.$id").in(setIds);
         final QueryBuilder publishedQuery = QueryBuilder.start("state").is(Field.PUBLISHED);

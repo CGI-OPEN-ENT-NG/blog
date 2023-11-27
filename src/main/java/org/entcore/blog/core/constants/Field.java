@@ -16,6 +16,7 @@ public class Field {
     public static final String USERNAME = "username";
     public static final String PUBLISHED = "PUBLISHED";
     public static final String POST = "post";
+    public static final String CONTENT = "content";
 
     private Field() {
         throw new IllegalStateException("Utility class");
