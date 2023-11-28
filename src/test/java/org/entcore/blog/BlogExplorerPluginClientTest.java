@@ -1,6 +1,5 @@
 package org.entcore.blog;
 
-import com.opendigitaleducation.explorer.ingest.IngestJobMetricsRecorderFactory;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.webutils.security.SecuredAction;
@@ -23,7 +22,6 @@ import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.explorer.IExplorerFolderTree;
 import org.entcore.common.explorer.IExplorerPluginClient;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
-import org.entcore.common.explorer.to.ExplorerReindexResourcesRequest;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.user.UserInfos;
 import org.entcore.test.TestHelper;
@@ -35,8 +33,6 @@ import org.junit.runner.RunWith;
 import org.testcontainers.containers.MongoDBContainer;
 
 import java.util.*;
-
-import static java.util.Collections.emptySet;
 
 @RunWith(VertxUnitRunner.class)
 public class BlogExplorerPluginClientTest {
@@ -168,7 +164,7 @@ public class BlogExplorerPluginClientTest {
                                 return saveFolder("folder1", user, Optional.empty()).compose(folder1 -> {
                                     final String folder1Id = folder1.getString("_id");
                                     return saveFolder("folder2", user, Optional.ofNullable(folder1Id), blog3Id).compose(folder2 -> {
-                                        return client.reindex(admin, new ExplorerReindexResourcesRequest(null, null, emptySet(), true, emptySet())).onComplete(context.asyncAssertSuccess(indexation -> {
+                                        return client.getForIndexation(admin, Optional.empty(), Optional.empty(), new HashSet<>(), true).onComplete(context.asyncAssertSuccess(indexation -> {
                                             context.assertEquals(3, indexation.nbBatch);
                                             context.assertEquals(3, indexation.nbMessage);
                                             explorerTest.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(pending -> {
