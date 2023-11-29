@@ -76,8 +76,8 @@ public class PostSearch implements ISearch {
         // toArray(DBObject[]::new) allows you to have a DBObject... from a stream
         worldsQuery.and(searchWords.stream().map(s -> new QueryBuilder()
                 .or(
-                        QueryBuilder.start(Field.TITLE).regex(Pattern.compile(".*(?=.*(\\b|>)" + s + "(\\b|<)).*")).get(),
-                        QueryBuilder.start(Field.CONTENT).regex(Pattern.compile(".*(?=.*(\\b|>)" + s + "(\\b|<)).*")).get()
+                        QueryBuilder.start(Field.TITLE).regex(Pattern.compile("(^|$|\\W)" + s + "(^|$|\\W)", (Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE))).get(),
+                        QueryBuilder.start(Field.CONTENT).regex(Pattern.compile("(^|$|\\W)" + s + "(^|$|\\W)", (Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE))).get()
                 ).get()).toArray(DBObject[]::new));
 
         final QueryBuilder blogQuery = QueryBuilder.start("blog.$id").in(setIds);

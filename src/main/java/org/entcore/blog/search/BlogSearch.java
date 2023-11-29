@@ -47,10 +47,9 @@ public class BlogSearch implements ISearch {
         for (String gpId : groupIds) {
             groups.add(QueryBuilder.start(Field.GROUPID).is(gpId).get());
         }
-        final QueryBuilder worldsQuery = QueryBuilder.start(Field.TITLE);
-        String searching = searchWordsArray.stream()
-                .map(s -> new StringBuilder().append("(?=.*\\b").append(s).append("\\b)")).collect(Collectors.joining());
-        worldsQuery.regex(Pattern.compile(".*" + searching + ".*", Pattern.CASE_INSENSITIVE));
+        final QueryBuilder worldsQuery = QueryBuilder.start();
+        worldsQuery.and(searchWordsArray.stream().map(s -> QueryBuilder.start(Field.TITLE).regex(Pattern.compile("(^|$|\\W)" + s + "(^|$|\\W)", (Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE))).get())
+                .toArray(DBObject[]::new));
         return new QueryBuilder().and(worldsQuery.get(),
                 new QueryBuilder().or(
                         QueryBuilder.start(Field.VISIBILITY).is(Field.PUBLIC).get(),
