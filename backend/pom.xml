@@ -10,7 +10,7 @@
   </parent>
   <groupId>org.entcore</groupId>
   <artifactId>blog</artifactId>
-  <version>5.5-SNAPSHOT</version>
+  <version>5.5.11-CAMPUS</version>
   <scm>
     <connection>scm:git:https://github.com/edificeio/blog.git</connection>
     <developerConnection>scm:git:https://github.com/edificeio/blog.git</developerConnection>
